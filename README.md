@@ -20,10 +20,10 @@ Install Whisper and its dependencies locally: Use the installation script **inst
 
 ## Usage
 Now donwload the whisper_transcribe_translate.py to run it locally on your system in the active virtual whisper environment.
-   ```bash
+   '''bash
    wget https://raw.githubusercontent.com/custom-build-robots/OpenAI-whisper-transcribe-or-translate-locally/refs/heads/main/whisper_transcribe_translate.py
 Basic Usage: Run the script to transcribe an English audio file:
-   ```bash
+   '''bash
    python whisper_transcribe_translate.py
 ## Whisper Model Management
 The script uses the Whisper large-v2 model by default, but you can customize the model or specify its directory. Models are cached in a local models/ folder.
