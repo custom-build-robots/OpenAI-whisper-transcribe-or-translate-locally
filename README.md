@@ -2,6 +2,8 @@
 
 This Python script uses OpenAI's Whisper model to transcribe or translate audio files. It allows you to optionally set the source language, specify a translation task, and customize the output file name. By default, the script assumes English as the source language and transcribes the audio.
 
+On my blog you will get some more details about the program and how to use it: [How to Install and Use OpenAI’s Whisper Locally for Automatic Transcription and Translation](https://ai-box.eu/en/news/how-to-install-and-use-openais-whisper-locally-for-automatic-transcription-and-translation/1449/)
+
 ## Features
 
 - **Audio Transcription**: Converts audio files into text.
@@ -18,7 +20,7 @@ Install Whisper and its dependencies locally: Use the installation script **inst
 [Installation Scripts for Generative AI Tools](https://github.com/custom-build-robots/Installation-Scripts-for-Generative-AI-Tools)
 
 
-## Usage whisper_transcribe_translate.py
+## Usage whisper_transcribe_translate.py terminal
 1. Now donwload the whisper_transcribe_translate.py to run it locally on your system in the active virtual whisper environment:
    ```bash
    wget https://raw.githubusercontent.com/custom-build-robots/OpenAI-whisper-transcribe-or-translate-locally/refs/heads/main/whisper_transcribe_translate.py
@@ -27,6 +29,19 @@ Install Whisper and its dependencies locally: Use the installation script **inst
    Run the script to transcribe an English audio file like a locally stored mp3 file:
    ```bash
    python whisper_transcribe_translate.py
+
+## Usage whisper_transcribe_translate.py gradio UI
+1. Now donwload the whisper_gradio_transcribe_translate.py to run it locally on your system in the active virtual whisper environment:
+   ```bash
+   wget https://raw.githubusercontent.com/custom-build-robots/OpenAI-whisper-transcribe-or-translate-locally/refs/heads/main/whisper_gradio_transcribe_translate.py
+2. Basic Usage:
+
+   Run the script to transcribe an English audio file like a locally stored mp3 file:
+   ```bash
+   python whisper_gradio_transcribe_translate.py
+
+
+   
 ## Whisper Model Management
 The script uses the Whisper large-v2 model by default, but you can customize the model or specify its directory.
 I already successfully used the following models locally on my server:
