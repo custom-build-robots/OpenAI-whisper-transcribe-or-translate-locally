@@ -15,7 +15,7 @@ print(f"Loading model '{model_name}' from directory: {model_path}")
 model = whisper.load_model(model_name, download_root=model_path)
 
 # Specify the path to your audio file
-audio_file = "/home/ingmar/whisper_offline/Satya.mp3"  # Replace with your MP3 file path
+audio_file = input("Enter source audio file (/home/ingmar/whisper_offline/Satya.mp3): ")
 
 # Optional: Set the source language and task
 # Defaults: English as the source language and transcription as the task
