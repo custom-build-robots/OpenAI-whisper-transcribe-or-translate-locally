@@ -40,6 +40,13 @@ Install Whisper and its dependencies locally: Use the installation script **inst
    Run the script to transcribe an English audio file like a locally stored mp3 file:
    ```bash
    python whisper_gradio_transcribe_translate.py
+
+   # OpenAI Whisper: Transcribe & Translate Web App
+
+![OpenAI's Whisper Transcribe & Translate Web App](https://ai-box.eu/wp-content/uploads/2024/12/OpenAIs_Whisper_transcribe_translate_web_app-1280x640.png)
+
+This project provides a web-based interface to OpenAI's Whisper model, allowing users to transcribe or translate audio files locally with a user-friendly interface.
+
    
 ## Whisper Model Management
 The script uses the Whisper large-v2 model by default, but you can customize the model or specify its directory.
