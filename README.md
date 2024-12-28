@@ -22,7 +22,7 @@ Install Whisper and its dependencies locally: Use the installation script **inst
 
 To install whisper locally on your Ubuntu machine follow the link below in the instruction provided
 
-```bash
+   ```bash
    wget https://raw.githubusercontent.com/custom-build-robots/Installation-Scripts-for-Generative-AI-Tools/main/install_whisper.sh
 
 
@@ -31,13 +31,14 @@ After installing whisper start the virtual environment which was created and fol
 ## Usage
 Now donwload the whisper_transcribe_translate.py to run it locally on your system in the active virtual whisper environment.
 
-```bash
+   ```bash
    wget <add the file>
 
 
 Basic Usage: Run the script to transcribe an English audio file:
-```bash
-python whisper_transcribe_translate.py
+
+   ```bash
+   python whisper_transcribe_translate.py
 
 
 ## Whisper Model Management
