@@ -10,17 +10,23 @@ This Python script uses OpenAI's Whisper model to transcribe or translate audio 
 - **Customizable Output**: Specify a custom output file name or use the default naming convention.
 - **Model Caching**: Downloads and caches Whisper models in a local directory for offline use.
 
-## Requirements
-
-- Python 3.8 or higher
-- Required Python packages:
-  - `whisper`
-  - `torch`
-  - (Optional for translation into non-English languages): `googletrans`
 
 ## Installation
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/yourusername/whisper-transcribe-translate.git
-   cd whisper-transcribe-translate
+Install Whisper and its dependencies locally: Use the installation script provided in my repository:
+
+Link: 
+
+### Download the script as follows:
+
+wget https://raw.githubusercontent.com/custom-build-robots/Installation-Scripts-for-Generative-AI-Tools/main/install_whisper.sh
+
+## Usage
+Basic Usage: Run the script to transcribe an English audio file:
+python whisper_transcribe_translate.py
+
+## Whisper Model Management
+The script uses the Whisper large-v2 model by default, but you can customize the model or specify its directory. Models are cached in a local models/ folder.
+
+## Contributing
+Feel free to open issues or submit pull requests to improve the script.
