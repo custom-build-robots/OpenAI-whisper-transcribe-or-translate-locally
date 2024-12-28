@@ -43,7 +43,7 @@ Install Whisper and its dependencies locally: Use the installation script **inst
 
    # OpenAI Whisper: Transcribe & Translate Web App
 
-![OpenAI's Whisper Transcribe & Translate Web App](https://ai-box.eu/wp-content/uploads/2024/12/OpenAIs_Whisper_transcribe_translate_web_app-1280x640.png)
+![OpenAI's Whisper Transcribe & Translate Web App](https://ai-box.eu/wp-content/uploads/2024/12/OpenAIs_Whisper_transcribe_translate_web_app-978x1024.png)
 
 This project provides a web-based interface to OpenAI's Whisper model, allowing users to transcribe or translate audio files locally with a user-friendly interface.
 
