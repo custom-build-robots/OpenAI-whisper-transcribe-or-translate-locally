@@ -18,7 +18,7 @@ Install Whisper and its dependencies locally: Use the installation script **inst
 [Installation Scripts for Generative AI Tools](https://github.com/custom-build-robots/Installation-Scripts-for-Generative-AI-Tools)
 
 
-## Usage
+## Usage whisper_transcribe_translate.py
 1. Now donwload the whisper_transcribe_translate.py to run it locally on your system in the active virtual whisper environment:
    ```bash
    wget https://raw.githubusercontent.com/custom-build-robots/OpenAI-whisper-transcribe-or-translate-locally/refs/heads/main/whisper_transcribe_translate.py
@@ -29,6 +29,10 @@ Install Whisper and its dependencies locally: Use the installation script **inst
    python whisper_transcribe_translate.py
 ## Whisper Model Management
 The script uses the Whisper large-v2 model by default, but you can customize the model or specify its directory.
+I already successfully used the following models locally on my server:
+- base.pt  
+- large-v2.pt
+- large-v3.pt
 
 Models are cached in a local models/ folder.
 
