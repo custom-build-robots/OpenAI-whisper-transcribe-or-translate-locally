@@ -4,9 +4,9 @@
 # Version: 0.4
 #
 # Description:
-# This script provides a Gradio-based user interface to transcribe or translate audio files locally
-# using OpenAI's Whisper model. It has two main features:
-#   1) Processing a local audio file.
+# This script provides a Gradio-based user interface to transcribe or translate audio (and now also
+# video) files locally using OpenAI's Whisper model. It has two main features:
+#   1) Processing a local file (audio or video).
 #   2) Processing a video URL (e.g., YouTube link), downloading the video, extracting its audio,
 #      and then running Whisper on the extracted audio.
 #
@@ -22,7 +22,7 @@
 #   - Python 3.7+
 #   - The 'whisper' package (OpenAI’s Whisper)
 #   - 'gradio' for the user interface
-#   - 'yt-dlp' for video downloading
+#   - 'yt-dlp' for video downloading (for the "Process Video URL" feature)
 #   - 'ffmpeg' for audio extraction
 #   - Other dependencies listed in the requirements file or installation instructions
 #
@@ -55,45 +55,86 @@ def patched_torch_load(*args, **kwargs):
 
 torch.load = patched_torch_load
 
-def process_audio(audio_file, model_name, source_language, task):
+def process_audio(input_file, model_name, source_language, task):
+    """
+    Processes a user-uploaded file. If it's audio, proceed directly;
+    if it's a video, extract the audio with ffmpeg first, then transcribe.
+    """
+
     model_path = "models/"
     output_folder = "transcribe/"
 
-    # Ensure the custom model and output folders exist
+    # Ensure our directories exist
     os.makedirs(model_path, exist_ok=True)
     os.makedirs(output_folder, exist_ok=True)
 
+    # Detect file extension
+    file_ext = os.path.splitext(input_file)[1].lower()
+
+    # List of "known" audio formats. If extension not in this list, we'll assume it's video.
+    known_audio_exts = [".wav", ".mp3", ".flac", ".ogg", ".m4a", ".aac"]
+
+    # If this is a "video," extract the audio first
+    if file_ext not in known_audio_exts:
+        # Generate a timestamped WAV name
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        extracted_audio = os.path.join(output_folder, f"extracted_{timestamp}.wav")
+
+        # Extract audio with ffmpeg
+        # -vn means "no video", output WAV at 16-bit, 44.1 kHz (modify if you prefer)
+        extract_cmd = [
+            "ffmpeg", "-i", input_file, "-vn",
+            "-acodec", "pcm_s16le", "-ar", "44100", "-ac", "1",
+            extracted_audio
+        ]
+        try:
+            subprocess.run(extract_cmd, check=True)
+            # Use the extracted WAV as the "audio_file" for Whisper
+            audio_file = extracted_audio
+        except subprocess.CalledProcessError as e:
+            return (
+                f"Failed to extract audio: {str(e)}",
+                "",
+                "Audio extraction failed.",
+                ""
+            )
+    else:
+        # It's already audio
+        audio_file = input_file
+
     # Load the Whisper model
     model = whisper.load_model(model_name, download_root=model_path)
-
-    # Verify if the model was used from the custom folder
     model_file = os.path.join(model_path, f"{model_name}.pt")
+
     if os.path.exists(model_file):
         model_status = f"Model successfully loaded from: {model_file}"
     else:
         model_status = f"Model was downloaded to: {model_file}"
 
-    # Map "transcribe & translate" to Whisper's "translate" task
+    # If task is "transcribe & translate," map to Whisper's internal "translate"
     if task == "transcribe & translate":
         task = "translate"
 
-    # Process the audio file
+    # Now run Whisper on the (possibly extracted) audio
     result = model.transcribe(audio_file, language=source_language, task=task)
     output_text = result["text"]
 
-    # Set the output file name with a timestamp
+    # Compose an output text filename
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     base_name = os.path.splitext(os.path.basename(audio_file))[0]
     output_type = "translated" if task == "translate" else "transcribed"
+
     output_filename = os.path.join(
-        output_folder, f"{base_name}_{output_type}_{timestamp}.txt"
+        output_folder,
+        f"{base_name}_{output_type}_{timestamp}.txt"
     )
 
-    # Save the transcription/translation to a text file
+    # Save the transcription
     with open(output_filename, "w", encoding="utf-8") as file:
         file.write(output_text)
 
     return output_text, model_status, f"Output saved to {output_filename}", output_filename
+
 
 def process_url(video_url, model_name, source_language, task):
     """
@@ -103,7 +144,6 @@ def process_url(video_url, model_name, source_language, task):
     model_path = "models/"
     output_folder = "transcribe/"
 
-    # Ensure the custom model and output folders exist
     os.makedirs(model_path, exist_ok=True)
     os.makedirs(output_folder, exist_ok=True)
 
@@ -111,8 +151,7 @@ def process_url(video_url, model_name, source_language, task):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     try:
-        # Download the video using yt-dlp, adding the timestamp to the filename
-        # e.g. "MyVideoTitle_ABC123_YYYYMMDD_HHMMSS.mp4"
+        # Download video with yt-dlp
         download_command = [
             "yt-dlp",
             "-o",
@@ -121,18 +160,13 @@ def process_url(video_url, model_name, source_language, task):
         ]
         subprocess.run(download_command, check=True)
 
-        # Identify the downloaded *.mp4 file that includes our timestamp
+        # Identify the downloaded *.mp4 file
         video_filename = None
         video_id = None
         for file in os.listdir(output_folder):
-            # We only look for .mp4 files that contain this timestamp
             if file.endswith(".mp4") and timestamp in file:
                 video_filename = os.path.join(output_folder, file)
-                # Extract the YouTube ID from the filename if you like
-                # (split by underscores and take the second to last piece, etc.)
-                # For example: "MyVideoTitle_ABC123_20240101_123000.mp4"
-                # the segment "ABC123" would be at index -2 if the pattern is consistent
-                # But let's keep it simple and do what you had before:
+                # Attempt to parse out a video ID if desired
                 parts = os.path.splitext(file)[0].split('_')
                 video_id = parts[-2] if len(parts) >= 2 else None
                 break
@@ -140,9 +174,10 @@ def process_url(video_url, model_name, source_language, task):
         if not video_filename:
             return None, None, "No video file found after download.", None
 
-        # Extract audio using ffmpeg, also add timestamp to the .mp3
+        # Extract audio with ffmpeg, add timestamp to the mp3
         audio_filename = os.path.splitext(video_filename)[0] + f"_{timestamp}.mp3"
         subprocess.run(["ffmpeg", "-i", video_filename, "-q:a", "0", "-map", "a", audio_filename], check=True)
+
     except subprocess.CalledProcessError as e:
         return None, None, f"Error during video or audio processing: {str(e)}", None
 
@@ -154,21 +189,18 @@ def process_url(video_url, model_name, source_language, task):
     else:
         model_status = f"Model was downloaded to: {model_file}"
 
-    # Map "transcribe & translate" to Whisper's "translate" task
     if task == "transcribe & translate":
         task = "translate"
 
-    # Process the audio file with Whisper
+    # Transcribe the extracted audio
     result = model.transcribe(audio_filename, language=source_language, task=task)
     output_text = result["text"]
 
-    # Set the output file name with a timestamp and video ID
-    # to store the final text transcription
+    # Create a text file for the final transcription
     final_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    base_name = os.path.splitext(os.path.basename(audio_filename))[0]  # includes the old timestamp
+    base_name = os.path.splitext(os.path.basename(audio_filename))[0]
     output_type = "translated" if task == "translate" else "transcribed"
 
-    # Combine the original audio base, new final timestamp, and video_id if we have it
     if video_id:
         output_filename = os.path.join(
             output_folder,
@@ -185,30 +217,27 @@ def process_url(video_url, model_name, source_language, task):
 
     return output_text, model_status, f"Output saved to {output_filename}", output_filename
 
-
-# Gradio interface
 def gradio_app():
     try:
         with gr.Blocks() as app:
             gr.Markdown("""
         # Whisper Transcribe & Translate
-        Transcribe or translate audio files locally using OpenAI's Whisper model. 
+        Transcribe or translate audio **or video** files locally using OpenAI's Whisper model. 
         
-        **Tab Process Audio File**
-        
-        Just drag & drop a audio file for transcribing and translating.
-        
-        **Process Video URL**
-        
-        Easily download a video from supported websites and let the app handle the transcription or translation for you. 
-        Check out the list of [Supported sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md) for video downloading and transcription. 
-        Configure your settings below to get started."
+        **Tab: Process Audio or Video File**
+          - You can upload an audio file (e.g., WAV, MP3) or a video file (e.g., MP4). If a video is detected, 
+            this app will automatically extract its audio via ffmpeg before transcribing or translating.
+
+        **Tab: Process Video URL**
+          - Easily download a video from supported websites and let the app handle the transcription or translation for you.
+          - Check out the list of [Supported sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md) 
+            for video downloading. 
         """)
 
-            with gr.Tab("Process Audio File"):
-                gr.Markdown("## Upload a audio file")
+            with gr.Tab("Process Audio or Video File"):
+                gr.Markdown("## Upload an audio or video file")
                 with gr.Row():
-                    audio_file = gr.File(label="Upload Recorded Audio")
+                    uploaded_file = gr.File(label="Upload Audio/Video File")
 
                 with gr.Row():
                     model_name_audio = gr.Dropdown(
@@ -226,7 +255,7 @@ def gradio_app():
                         label="Task"
                     )
 
-                submit_audio = gr.Button("Process Audio")
+                submit_audio = gr.Button("Process File")
 
                 output_text_audio = gr.Textbox(label="Transcription/Translation Output")
                 model_status_audio = gr.Textbox(label="Model Status")
@@ -235,7 +264,7 @@ def gradio_app():
 
                 submit_audio.click(
                     fn=process_audio,
-                    inputs=[audio_file, model_name_audio, source_language_audio, task_audio],
+                    inputs=[uploaded_file, model_name_audio, source_language_audio, task_audio],
                     outputs=[output_text_audio, model_status_audio, file_status_audio, download_button_audio]
                 )
 
@@ -273,7 +302,6 @@ def gradio_app():
                     outputs=[output_text, model_status, file_status, download_button]
                 )
 
-            # Launch the Gradio app
             app.launch(server_name="0.0.0.0", server_port=7860)
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -281,4 +309,3 @@ def gradio_app():
 if __name__ == "__main__":
     print("Starting Whisper Gradio app...")
     gradio_app()
-
