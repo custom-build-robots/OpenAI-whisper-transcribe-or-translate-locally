@@ -31,13 +31,13 @@ Install Whisper and its dependencies locally: Use the installation script **inst
    ```bash
    python whisper_transcribe_translate.py
 
-## Usage wwhisper_transcribe_translate_processing.py gradio UI
+## Usage whisper_transcribe_translate_processing.py gradio UI
 1. Now donwload the whisper_transcribe_translate_processing.py to run it locally on your system in the active virtual whisper environment:
    ```bash
    wget https://raw.githubusercontent.com/custom-build-robots/OpenAI-whisper-transcribe-or-translate-locally/refs/heads/main/whisper_transcribe_translate_processing.py
 2. Basic Usage:
 
-   Run the script to transcribe an English audio file like a locally stored mp3 file:
+   Run the script to transcribe an English audio file like a locally stored mp3 files or video files like mp4:
    ```bash
    python whisper_transcribe_translate_processing.py
 
